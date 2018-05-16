@@ -18,7 +18,6 @@ var error_page = {
 */
 var server = {
     "listen": { "addr":":80"}
-            
 }
 
 var server1 = {
@@ -80,4 +79,4 @@ var main = {
     "http": http,
 };
 
-nghttp.main(main)
+nghttp_main(main)
