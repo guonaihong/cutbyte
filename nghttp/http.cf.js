@@ -16,12 +16,12 @@ var error_page = {
 };
 
 */
-var server = {
-    "listen": { "addr":":80"}
-}
 
-var server1 = {
-    "listen": { "addr":":80"}
+var servers = []
+for (var i = 0; i < 3; i++) {
+    servers.push({
+        "listen" :{"addr": ":1234" + i}
+    })
 }
 
 var location3 = {
@@ -64,13 +64,13 @@ var location4 = {
     "expires": "30d",
 }
 
+servers.push(server2)
+
 var http = {
     "include":"./mime.types",
     "default_type":  "application/octet-stream",
     "access_log":"./access.log",
-    "server":[
-        server, server1, server2,
-    ],
+    "server": servers,
 };
 
 var main = {

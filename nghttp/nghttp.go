@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"github.com/robertkrimen/otto"
 	"io/ioutil"
+	"net/http"
 	"strings"
+	"sync"
+	"time"
 )
 
 type Listen struct {
@@ -33,6 +36,7 @@ type NgMain struct {
 
 func (ng *NgMain) server(v interface{}) {
 	servers := v.([]map[string]interface{})
+
 	for _, ser := range servers {
 
 		for _, l := range ser {
@@ -41,9 +45,15 @@ func (ng *NgMain) server(v interface{}) {
 				return
 			}
 
+			server := Server{}
 			for k, v := range listen {
-				fmt.Printf("k(%s), v(%s)\n", k, v)
+				if k == "addr" {
+					server.Listen.Addr = v.(string)
+				}
+				//fmt.Printf("k(%s),%T, v(%s), %T\n", k, k, v, v)
 			}
+
+			ng.Http.Server = append(ng.Http.Server, server)
 		}
 	}
 }
@@ -92,6 +102,34 @@ func (ng *NgMain) ngMain(call otto.FunctionCall) otto.Value {
 	return otto.Value{}
 }
 
+func (ng *NgMain) httpServerRun() {
+
+	wg := sync.WaitGroup{}
+
+	for _, v := range ng.Http.Server {
+		wg.Add(1)
+		go func(v Server) {
+			defer wg.Done()
+			mux := http.NewServeMux()
+			mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+				w.Write([]byte("good !"))
+			})
+
+			fmt.Printf("-->%s\n", v.Listen.Addr)
+			server := &http.Server{
+				Addr:         v.Listen.Addr,
+				ReadTimeout:  60 * time.Second,
+				WriteTimeout: 60 * time.Second,
+				Handler:      mux,
+			}
+
+			fmt.Println(server.ListenAndServe())
+		}(v)
+	}
+
+	wg.Wait()
+}
+
 func Loop(conf string) {
 	all, err := ioutil.ReadFile(conf)
 	if err != nil {
@@ -107,4 +145,6 @@ func Loop(conf string) {
 		fmt.Printf("%s\n", err)
 	}
 
+	fmt.Printf("%s\n", ng)
+	ng.httpServerRun()
 }
