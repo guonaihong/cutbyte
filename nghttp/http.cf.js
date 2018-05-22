@@ -1,36 +1,32 @@
 /*
-var error_page = {
-    "code": "404",
-    "to" :"/emtpy.gif",
-};
+var location4 = {
+    "reg":"^/(images|javascript|js|css|flash|media|static)/",
+    "root":"/var/www/virtual/htdocs",
+    "expires": "30d",
+}
 */
 
-/*
-var error_page = {
-    "code" :"404=200",
-};
+function Location(location) {
+    this.reg = location.reg;
+    if ('code' in location) {
+        this.writeCode(location.code);
+        return
+    }
+}
 
-var error_page = {
-    "code" :"404",
-    "to" : "index.html",
-};
-
-*/
+var locations = [
+    new Location({reg:"^~ /helloworld", code:601}),
+    new Location({reg:"/helloworld", code:602}),
+    new Location({reg:"/helloworld", code:603}),
+]
 
 var servers = []
 for (var i = 0; i < 3; i++) {
     servers.push({
-        "listen" :{"addr": ":1234" + i}
+        "listen" :{"addr": ":1234" + i},
+        "location": locations[i],
     })
 }
-
-var location3 = {
-    "proxy_pass": {},
-};
-
-var location2 = {
-    "reg": location3,
-};
 
 var error_page = {
     "code": "404",
@@ -54,14 +50,8 @@ var server2 = {
     "listen": {"addr":":80"},
     "server_name" : "www.xxx.com",
     "access_log":"./local-access.log",
-    "location":   location1,
+    "location":   [location1],
     "error_page": error_page,
-}
-
-var location4 = {
-    "reg":"^/(images|javascript|js|css|flash|media|static)/",
-    "root":"/var/www/virtual/htdocs",
-    "expires": "30d",
 }
 
 servers.push(server2)

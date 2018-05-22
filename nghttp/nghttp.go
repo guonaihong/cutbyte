@@ -15,6 +15,12 @@ type Listen struct {
 	Addr string
 }
 
+type Location struct {
+	Reg   string
+	Root  string
+	Index []string
+}
+
 type Server struct {
 	Listen     Listen
 	ServerName string
