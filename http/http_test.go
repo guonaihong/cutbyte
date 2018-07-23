@@ -1,9 +1,9 @@
-package nghttp
+package http
 
 import (
 	"testing"
 )
 
 func TestLoop(t *testing.T) {
-	Loop("./http.cf.js")
+	//Loop("./http.cf.js")
 }

@@ -1,12 +1,12 @@
-package nghttp
+package http
 
 import (
 	_ "encoding/json"
 	"fmt"
-	"github.com/robertkrimen/otto"
+	"github.com/yuin/gopher-lua"
 	"io/ioutil"
-	"net/http"
-	"strings"
+	gohttp "net/http"
+	_ "strings"
 	"sync"
 	"time"
 )
@@ -34,12 +34,13 @@ type Http struct {
 	Server      []Server
 }
 
-type NgMain struct {
+type CutByte struct {
 	ErrorLog string
 	Pid      string
 	Http     Http
 }
 
+/*
 func (ng *NgMain) server(v interface{}) {
 	servers := v.([]map[string]interface{})
 
@@ -107,22 +108,23 @@ func (ng *NgMain) ngMain(call otto.FunctionCall) otto.Value {
 
 	return otto.Value{}
 }
+*/
 
-func (ng *NgMain) httpServerRun() {
+func (c *CutByte) httpServerRun() {
 
 	wg := sync.WaitGroup{}
 
-	for _, v := range ng.Http.Server {
+	for _, v := range c.Http.Server {
 		wg.Add(1)
 		go func(v Server) {
 			defer wg.Done()
-			mux := http.NewServeMux()
-			mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			mux := gohttp.NewServeMux()
+			mux.HandleFunc("/", func(w gohttp.ResponseWriter, r *gohttp.Request) {
 				w.Write([]byte("good !"))
 			})
 
 			fmt.Printf("-->%s\n", v.Listen.Addr)
-			server := &http.Server{
+			server := &gohttp.Server{
 				Addr:         v.Listen.Addr,
 				ReadTimeout:  60 * time.Second,
 				WriteTimeout: 60 * time.Second,
@@ -143,14 +145,14 @@ func Loop(conf string) {
 		return
 	}
 
-	ng := NgMain{}
-	vm := otto.New()
-	vm.Set("nghttp_main", ng.ngMain)
-	_, err = vm.Run(string(all))
+	c := CutByte{}
+	L := lua.NewState()
+	err = L.DoString(string(all))
 	if err != nil {
 		fmt.Printf("%s\n", err)
+		return
 	}
 
-	fmt.Printf("%s\n", ng)
-	ng.httpServerRun()
+	fmt.Printf("%s\n", c)
+	c.httpServerRun()
 }

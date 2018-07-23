@@ -2,8 +2,8 @@ package main
 
 import (
 	_ "fmt"
-	"github.com/NaihongGuo/flag"
-	"github.com/guonaihong/ng/nghttp"
+	"github.com/guonaihong/cutbyte/http"
+	"github.com/guonaihong/flag"
 )
 
 func main() {
@@ -15,5 +15,5 @@ func main() {
 		return
 	}
 
-	nghttp.Loop(*conf)
+	http.Loop(*conf)
 }
